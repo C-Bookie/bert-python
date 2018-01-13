@@ -52,8 +52,8 @@ def box(x, y, s, p):
         px=0
         while px < x:
             pixels[x+px, y+py] = p
-            x+=1
-        y+=1
+            px+=1
+        py+=1
 
 def paint():
     disp.image(image)
