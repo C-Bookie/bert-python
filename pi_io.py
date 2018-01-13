@@ -20,8 +20,10 @@ def init():
     global image
     image = Image.new('1', (width, height))
 
-    draw = ImageDraw.Draw(image)
-    draw.rectangle((0,0,width,height), outline=0, fill=0)
+    global pixels
+    pixels = image.load()
+#    draw = ImageDraw.Draw(image)
+#    draw.rectangle((0,0,width,height), outline=0, fill=0)
 
 
 def draw(red, green, blue, C, T):
@@ -34,7 +36,8 @@ def draw(red, green, blue, C, T):
         x = 0
         while x < width:
             p = C[(y * width) + x]
-            draw.point([x, y], 1)
+            pixels[x, y] = p > T/2 if 1 else 0
+#            draw.point([x, y], 1)
             x += 1
             if (y * width) + x >= len(C):
                 return
