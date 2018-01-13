@@ -38,11 +38,12 @@ def draw(red, green, blue, C, T):
     while True:
         x = 0
         while x < subWidth:
-#            p = C[(y * subWidth) + x] > T/2 if 1 else 0
+            p = C[(y * subWidth) + x] > T/2 if 1 else 0
 #            p = (x+y)%2
-            p = x%2
+#            p = x%2
 #            p = y%2
             box(x, y, size, p)
+            pixels[x, y] = p
 #            draw.point([x, y], 1)
             x += 1
             if (y * subWidth) + x >= len(C):
@@ -54,7 +55,7 @@ def box(x, y, s, p):
     while py < s:
         px=0
         while px < s:
-            pixels[x+px, y+py] = p
+            pixels[(x*s)+px, (y*s)+py] = p
             px+=1
         py+=1
 
