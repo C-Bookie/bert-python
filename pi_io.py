@@ -26,6 +26,7 @@ def init():
 
 def draw(red, green, blue, C, T):
     #    print("Red: " + str(r) + " Green: " + str(g) + " Blue: " + str(b))
+
     disp.clear()
 
     y = 0
@@ -33,13 +34,14 @@ def draw(red, green, blue, C, T):
         x = 0
         while x < width:
             p = C[(y * width) + x]
-            draw.point(x, y)
+            draw.point([x, y], 1)
             x += 1
             if (y * width) + x >= len(C):
                 return
         y += 1
 
 def paint():
+    disp.image(image)
     disp.display()
     return
 
