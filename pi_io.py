@@ -38,7 +38,8 @@ def draw(red, green, blue, C, T):
     while True:
         x = 0
         while x < subWidth:
-            p = C[(y * subWidth) + x] > T/2 if 1 else 0
+#            p = C[(y * subWidth) + x] > T/2 if 1 else 0
+            p = (x+y)%2
             box(x, y, size, p)
 #            draw.point([x, y], 1)
             x += 1

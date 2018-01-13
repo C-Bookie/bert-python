@@ -5,6 +5,7 @@
 import re
 import random
 import math
+import time
 
 #import screen
 import pi_io
@@ -111,6 +112,7 @@ def run():
             shocks = 0
             fires = 0
         cycle+=1
+        time.sleep(0.01)
 
     print(C)
 
