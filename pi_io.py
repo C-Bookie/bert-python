@@ -46,7 +46,7 @@ def draw(red, green, blue, C, T):
                 return
         y += 1
 
-def box(x, y, s, p)
+def box(x, y, s, p):
     py=0
     while py < y:
         px=0
