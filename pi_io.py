@@ -43,7 +43,7 @@ def draw(red, green, blue, C, T):
 #            p = x%2
 #            p = y%2
             box(x, y, size, p)
-            pixels[x, y] = p
+#            pixels[x, y] = p
 #            draw.point([x, y], 1)
             x += 1
             if (y * subWidth) + x >= len(C):
