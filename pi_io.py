@@ -48,9 +48,9 @@ def draw(red, green, blue, C, T):
 
 def box(x, y, s, p):
     py=0
-    while py < y:
+    while py < s:
         px=0
-        while px < x:
+        while px < s:
             pixels[x+px, y+py] = p
             px+=1
         py+=1
