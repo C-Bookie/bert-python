@@ -1,12 +1,17 @@
 import pygame, sys
 from pygame.locals import *
+import math
+
+pSize = 10
+height = 400
+width = 300
 
 def init():
     pygame.init()
 
     # set up the window
     global DISPLAYSURF
-    DISPLAYSURF = pygame.display.set_mode((400, 300), 0, 32)
+    DISPLAYSURF = pygame.display.set_mode((height, width), 0, 32)
     pygame.display.set_caption('Drawing')
 
     # set up the colors
@@ -21,10 +26,28 @@ def init():
     global BLUE
     BLUE = (0, 0, 255)
 
-def draw(r=0, g=0, b=0):
-    print("red: " + str(r) + "blue: " + str(b) + " green: " + str(g))
+def draw(r=0, g=0, b=0, C=[], T=30):
+#    print("Red: " + str(r) + " Green: " + str(g) + " Blue: " + str(b))
     global DISPLAYSURF
     DISPLAYSURF.fill((r*255, g*255, b*255))
+
+    length = math.floor(math.sqrt(len(C)))
+    startX = math.floor((width-(length*pSize))/2)
+    startY = math.floor((height-((len(C)/length)*pSize))/2)
+    y=0
+    while True:
+        x = 0
+        while x < length:
+            p = C[(y*length)+x]
+            px = startX + (x*pSize)
+            py = startY + (y*pSize)
+#            pygame.draw.rect(DISPLAYSURF, p>=T if (p*(255/T), 0, 0) else (0, p*(255/T), 0), (px, px + pSize, py + pSize))
+            pygame.draw.rect(DISPLAYSURF, (p*(255/T)%255, 0, 0), (px, py, pSize, pSize))
+            x+=1
+            if (y*length)+x >= len(C):
+                return
+        y+=1
+
 
 def test():
     global DISPLAYSURF
@@ -48,11 +71,11 @@ def test():
 
     # run the game loop
     while True:
-        for event in pygame.event.get():
-            if event.type == QUIT:
-                pygame.quit()
-                sys.exit()
-        pygame.display.update()
+        paint()
 
 def paint():
+    for event in pygame.event.get():
+        if event.type == QUIT:
+            pygame.quit()
+            sys.exit()
     pygame.display.update()

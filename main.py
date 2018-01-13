@@ -5,7 +5,10 @@
 import re
 import random
 import math
-import screen
+
+#import screen
+import pi_io
+display = pi_io
 
 #used for importing a .map file of neurons
 def makeNeurons(_path):
@@ -52,7 +55,7 @@ def run():
     #half life, the multiplyer applyed to the charges each cycle
     HL = 0.99
     #number of times to loop, make negative to loop indefinitely (or until bit overflow)
-    loop = 10000
+    loop = -10000
     cycle = 0
     #shock will randomly charge neurons to keep a network active (though not truthfully simulated), should be set between 0 and 1, set to 0 to disable
     shock = 0.666
@@ -67,7 +70,7 @@ def run():
 
     #statistics
     #how many cycles it should print
-    pollRate = 10
+    pollRate = 100
     #change rate, determines the half life
     changeR=1/1.5
     shocks = 0
@@ -76,10 +79,10 @@ def run():
     avgFires = 1
 
 
-    screen.init()
+    display.init()
 
-    while cycle < loop:
-        if shock != 0:
+    while cycle != loop:
+        if shock != 0 and avgFires < 10*pollRate:
             while random.uniform(0, 1) < shock:
                 C[random.randint(0, len(C)-1)] += random.randint(0, math.floor(T*shock))
 #                C[random.randint(0, len(C) - 1)] = math.ceil(T/HL)
@@ -99,12 +102,12 @@ def run():
  #           avgFires = ((avgFires * (cycle / pollRate)) + fires) / ((cycle / pollRate) + 1)
             avgShocks = (avgShocks+(shocks*changeR)) / (1+changeR)
             avgFires = (avgFires+(fires*changeR)) / (1+changeR)
-#            print("cycle: " + str(cycle) + " avgShocks: " + str(math.floor(avgShocks)) + " shocks: " + str(shocks) + " avgFires: " + str(math.floor(avgFires)) + " fires: " + str(fires))
+            print("cycle: " + str(cycle) + " avgShocks: " + str(math.floor(avgShocks)) + " shocks: " + str(shocks) + " avgFires: " + str(math.floor(avgFires)) + " fires: " + str(fires))
             red = 0
             blue = sigmoid((shocks - avgShocks)/(avgShocks/1))
             green = sigmoid((fires - avgFires)/(avgFires/1))
-            screen.draw(red, green, blue)
-            screen.paint()
+            display.draw(red, green, blue, C, T)
+            display.paint()
             shocks = 0
             fires = 0
         cycle+=1
