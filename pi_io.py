@@ -25,19 +25,19 @@ def init():
 
 #    global pixels
 #    pixels = image.load()
-    global draw
-    draw = ImageDraw.Draw(image)
 #    draw.rectangle((0,0,width,height), outline=0, fill=0)
 
 
 def draw(red, green, blue, C, T):
     #    print("Red: " + str(r) + " Green: " + str(g) + " Blue: " + str(b))
+    draw = ImageDraw.Draw(image)
 
     size = 4
     subWidth = width/size
 
     disp.clear()
 
+    x=0
     y = 0
     while (y * subWidth) + x < len(C):
         x = 0
@@ -47,7 +47,8 @@ def draw(red, green, blue, C, T):
             draw.rectangle((x*size, y*size, size, size), outline=0, fill=p)
             x += 1
         y += 1
-    draw.text((x, y), "Red: " + str(red) + " Green: " + str(green) + " Blue: " + str(blue), font=font, fill=255)
+    draw.text((0, y*size+5), "R:" + str(red) + " G:" + str(green) + " B:" + str(blue), font=font, fill=255)
+    paint()
 
 
 def box(x, y, s, p):
