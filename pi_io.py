@@ -29,19 +29,31 @@ def init():
 def draw(red, green, blue, C, T):
     #    print("Red: " + str(r) + " Green: " + str(g) + " Blue: " + str(b))
 
+    size = 4
+    subWidth = width/size
+
     disp.clear()
 
     y = 0
     while True:
         x = 0
-        while x < width:
-            p = C[(y * width) + x]
-            pixels[x, y] = p > T/2 if 1 else 0
+        while x < subWidth:
+            p = C[(y * subWidth) + x] > T/2 if 1 else 0
+            box(x, y, size, p)
 #            draw.point([x, y], 1)
             x += 1
-            if (y * width) + x >= len(C):
+            if (y * subWidth) + x >= len(C):
                 return
         y += 1
+
+def box(x, y, s, p)
+    py=0
+    while py < y:
+        px=0
+        while px < x:
+            pixels[x+px, y+py] = p
+            x+=1
+        y+=1
 
 def paint():
     disp.image(image)
