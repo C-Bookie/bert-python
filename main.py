@@ -5,6 +5,7 @@
 import re
 import random
 import math
+import screen
 
 #used for importing a .map file of neurons
 def makeNeurons(_path):
@@ -66,13 +67,16 @@ def run():
 
     #statistics
     #how many cycles it should print
-    pollRate = 100
+    pollRate = 10
     #change rate, determines the half life
-    changeR=1/10
+    changeR=1/1.5
     shocks = 0
     avgShocks = 1
     fires = 0
     avgFires = 1
+
+
+    screen.init()
 
     while cycle < loop:
         if shock != 0:
@@ -96,9 +100,11 @@ def run():
             avgShocks = (avgShocks+(shocks*changeR)) / (1+changeR)
             avgFires = (avgFires+(fires*changeR)) / (1+changeR)
 #            print("cycle: " + str(cycle) + " avgShocks: " + str(math.floor(avgShocks)) + " shocks: " + str(shocks) + " avgFires: " + str(math.floor(avgFires)) + " fires: " + str(fires))
-#            blue = sigmoid((shocks - avgShocks)/(avgShocks/100))
-#            green = sigmoid((fires - avgFires)/(avgFires/100))
-            print("blue: " + str(blue) + " green: " + str(green))
+            red = 0
+            blue = sigmoid((shocks - avgShocks)/(avgShocks/1))
+            green = sigmoid((fires - avgFires)/(avgFires/1))
+            screen.draw(red, green, blue)
+            screen.paint()
             shocks = 0
             fires = 0
         cycle+=1
