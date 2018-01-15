@@ -42,12 +42,12 @@ def draw(r=0, g=0, b=0, C=[], T=30):
             px = startX + (x*pSize)
             py = startY + (y*pSize)
 #            pygame.draw.rect(DISPLAYSURF, p>=T if (p*(255/T), 0, 0) else (0, p*(255/T), 0), (px, px + pSize, py + pSize))
-            pygame.draw.rect(DISPLAYSURF, (p*(255/T)%255, 0, 0), (px, py, pSize, pSize))
+            pygame.draw.rect(DISPLAYSURF, (((p/T)%1)*255, 0, 255) if p>=T else (0, ((p/T)%1)*255, 0), (px, py, pSize, pSize))
             x+=1
             if (y*length)+x >= len(C):
+                paint()
                 return
         y+=1
-
 
 def test():
     global DISPLAYSURF
@@ -79,3 +79,7 @@ def paint():
             pygame.quit()
             sys.exit()
     pygame.display.update()
+
+if __name__ == '__main__':
+    init()
+    test()
