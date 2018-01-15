@@ -36,7 +36,7 @@ def makeNeurons(_path):
             break
         elif state == 1:
             if curN != int(line):
-                print("mapping error around: " + curN)
+                print("mapping error around: " + str(curN))
             state = 2
         elif state == 2:
             a = re.split("=", line)
@@ -108,7 +108,7 @@ def run():
             blue = sigmoid((shocks - avgShocks)/(avgShocks/1))
             green = sigmoid((fires - avgFires)/(avgFires/1))
             display.draw(red, green, blue, C, T)
-            display.paint()
+#            display.paint()
             shocks = 0
             fires = 0
         cycle+=1
