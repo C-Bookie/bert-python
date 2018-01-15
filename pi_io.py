@@ -7,6 +7,8 @@ from PIL import ImageFont
 
 import math
 
+import RPi.GPIO as GPIO
+
 
 def init():
     global disp
@@ -29,9 +31,26 @@ def init():
 #    pixels = image.load()
 #    draw.rectangle((0,0,width,height), outline=0, fill=0)
 
+    GPIO.setmode(GPIO.BCM)
+    GPIO.setup(6, GPIO.OUT)
+    GPIO.setup(12, GPIO.OUT)
+    GPIO.setup(13, GPIO.OUT)
+
+    GPIO.output(6, GPIO.LOW)    #red led
+    GPIO.output(12, GPIO.LOW)   #blue
+    GPIO.output(13, GPIO.LOW)   #green
+
+    global ledB
+    ledB = GPIO.PWM(12, 50)
+    ledB.start(10)
+
+    global ledG
+    ledG = GPIO.PWM(13, 50)
+    ledG.start(10)
+
+
 
 def draw(red, green, blue, C, T):
-#    print("Red: " + str(r) + " Green: " + str(g) + " Blue: " + str(b))
     image = Image.new('1', (width, height))
     draw = ImageDraw.Draw(image)
 
@@ -43,17 +62,21 @@ def draw(red, green, blue, C, T):
     while (y * subWidth) + x < len(C):
         x = 0
         while x < subWidth:
-            p = C[(y * subWidth) + x] > T/2 if 1 else 0
+            p = 1 if C[(y * subWidth) + x] > T/2 else 0
 #            box(x, y, size, p)
             draw.rectangle((x*size, y*size, (x*size)+size, (y*size)+size), outline=0, fill=p)
             x += 1
         y += 1
-    dp = 10^2
-
+    dp = 10**2
 
     draw.text((0, y*size+5), "R:" + str(math.floor(red*dp)/dp) + " G:" + str(math.floor(green*dp)/dp) + " B:" + str(math.floor(blue*dp)/dp), font=font, fill=255)
     paint(image)
     del draw
+
+#    print("Red: " + str(red) + " Green: " + str(green) + " Blue: " + str(blue))
+    GPIO.output(6,  GPIO.LOW if red == 0 else GPIO.HIGH)
+    ledG.ChangeDutyCycle(green*10)
+    ledB.ChangeDutyCycle(blue*10)
 
 
 def box(x, y, s, p):
@@ -69,4 +92,9 @@ def paint(newImage):
     disp.clear()
     disp.image(newImage)
     disp.display()
+
+def kill():
+    p.stop()
+    del disp
+    GPIO.cleanup()
 

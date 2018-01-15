@@ -56,12 +56,17 @@ def run():
     #half life, the multiplyer applyed to the charges each cycle
     HL = 0.99
     #number of times to loop, make negative to loop indefinitely (or until bit overflow)
-    loop = -10000
+    loop = 10000
     cycle = 0
     #shock will randomly charge neurons to keep a network active (though not truthfully simulated), should be set between 0 and 1, set to 0 to disable
     shock = 0.666
 #    shock = 0.15
 #    shock = 0
+
+    #max cycles a second
+    hz = 200
+    gap = 1/hz
+    lastCheck = 0
 
     #the current charge of all the neurons
     C = {}
@@ -71,50 +76,63 @@ def run():
 
     #statistics
     #how many cycles it should print
-    pollRate = 100
-    #change rate, determines the half life
+    pollRate = hz   #(almost) every second
+    #change rate, determines the half life of the averages
     changeR=1/1.5
+
     shocks = 0
     avgShocks = 1
+    solidAvgShocks = 2.*pollRate
+
     fires = 0
-    avgFires = 1
+    avgFires = 0
+    solidAvgFires = 41.*pollRate
 
+    try:
+        print("hz: "+str(hz) + " shock: "+str(shock) + " T: "+str(T) + " HL: "+str(HL) + " N: "+str(len(N)))
 
-    display.init()
+        display.init()
 
-    while cycle != loop:
-        if shock != 0 and avgFires < 10*pollRate:
-            while random.uniform(0, 1) < shock:
-                C[random.randint(0, len(C)-1)] += random.randint(0, math.floor(T*shock))
-#                C[random.randint(0, len(C) - 1)] = math.ceil(T/HL)
-                shocks+=1
+        while cycle != loop:
+            if shock != 0 and avgFires < 10*pollRate:
+                while random.uniform(0, 1) < shock:
+                    C[random.randint(0, len(C)-1)] += random.randint(0, math.floor(T*shock))
+                    #                C[random.randint(0, len(C) - 1)] = math.ceil(T/HL)
+                    shocks+=1
 
-        for i in N:
-            C[i] = C[i] * HL
-            if C[i] >= T:
-                for a in N[i]:
-                    j=N[i][a]
-                    C[j[0]]+=j[1]
-                C[i]=0
-                fires+=1
+            for i in N:
+                C[i] = C[i] * HL
+                if C[i] >= T:
+                    for a in N[i]:
+                        j=N[i][a]
+                        C[j[0]]+=j[1]
+                    C[i]=0
+                    fires+=1
 
-        if cycle%pollRate == 0:
-#            avgShocks = ((avgShocks*(cycle/pollRate))+shocks)/((cycle/pollRate)+1)
- #           avgFires = ((avgFires * (cycle / pollRate)) + fires) / ((cycle / pollRate) + 1)
-            avgShocks = (avgShocks+(shocks*changeR)) / (1+changeR)
-            avgFires = (avgFires+(fires*changeR)) / (1+changeR)
-            print("cycle: " + str(cycle) + " avgShocks: " + str(math.floor(avgShocks)) + " shocks: " + str(shocks) + " avgFires: " + str(math.floor(avgFires)) + " fires: " + str(fires))
-            red = 0
-            blue = sigmoid((shocks - avgShocks)/(avgShocks/1))
-            green = sigmoid((fires - avgFires)/(avgFires/1))
-            display.draw(red, green, blue, C, T)
-#            display.paint()
-            shocks = 0
-            fires = 0
-        cycle+=1
-        time.sleep(0.01)
+            if cycle%pollRate == 0:
+    #            avgShocks = ((avgShocks*(cycle/pollRate))+shocks)/((cycle/pollRate)+1)
+    #            avgFires = ((avgFires * (cycle / pollRate)) + fires) / ((cycle / pollRate) + 1)
+                avgShocks = (avgShocks+(shocks*changeR)) / (1+changeR)
+                avgFires = (avgFires+(fires*changeR)) / (1+changeR)
+                print("cycle: " + str(cycle) + " avgFires: " + str(math.floor(avgFires)) + " fires: " + str(fires) + " avgShocks: " + str(math.floor(avgShocks)) + " shocks: " + str(shocks))
+                red = 0
+    #            blue = (sigmoid((shocks - avgShocks)/(avgShocks/1))-0.5)*2
+    #            green =(sigmoid((fires - avgFires)/(avgFires/1))-0.5)*2
+                green = 1-(1/((fires / solidAvgFires)+1))
+                blue = 1-(1/((shocks / solidAvgShocks)+1))
+                display.draw(red, green, blue, C, T)
+                shocks = 0
+                fires = 0
+            cycle+=1
 
-    print(C)
+            now = time.time()
+            wait = (lastCheck+gap)-now
+            lastCheck = now
+            if wait > 0:
+                time.sleep(wait)
+    except:
+        print(C)
+        raise
 
 if __name__ == '__main__':
     run()
