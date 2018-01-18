@@ -7,9 +7,10 @@ import random
 import math
 import time
 
-import screen
+#import screen
 #import pi_io
-display = screen
+import terminal
+display = terminal
 
 #used for importing a .map file of neurons
 def makeNeurons(_path):
