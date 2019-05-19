@@ -1,46 +1,45 @@
 
-class Channel():
-    def __init__(self, equilibrium_potential):
-        self.equilibrium_potential = equilibrium_potential  # E_c the voltage when the current is 0
-        self.max_conductance = 0  # g_bar_c the maximum conductance of the channel fixme
+class Neuron:
+	def __init__(self):
+		# chloride Cl- GABA
+		self.inhibitory = Channel(
+			equilibrium = -70,
+			maximum_conductance=1
+		)
+		# sodium Na+ glutamate
+		self.excitatory = Channel(
+			equilibrium = +55,
+			maximum_conductance=1
+		)
+		# potassium K+
+		self.leak = Channel(
+			equilibrium = -70,
+			maximum_conductance=1
+		)
+		# calcium Ca++ todo
 
-    def update(self, v_m, time):
-        self.actual_conductance_fraction = 0  # g_c the fraction of the channels current from 0 to 1 at time t fixme
+		self.membrane_potential = self.getEquilibriumMembranePotential()
 
-        self.conductance = self.actual_conductance_fraction * self.max_conductance
-        self.net_potential = v_m - self.equilibrium_potential
-        self.current = self.conductance * self.net_potential  # g_c * g_bar_c * (v_m - E_c)
+	def getEquilibriumMembranePotential(self):
+		i = self.inhibitory.getConductance() * self.inhibitory.equilibrium
+		e = self.excitatory.getConductance() * self.excitatory.equilibrium
+		l = self.leak.getConductance() * self.leak.equilibrium
+		return (i + e + l) / (self.inhibitory.getConductance() + self.excitatory.getConductance() + self.leak.getConductance())
 
+	def getNetCurrent(self):
+		return self.inhibitory.getCurrent(self.membrane_potential) + self.excitatory.getCurrent(self.membrane_potential) + self.leak.getCurrent(self.membrane_potential)
 
-class Neuron():
-    def __init__(self):
-        self.excitatory = Channel(55)  # sodium Na+ glutamate
-        self.inhibitory = Channel(-70)  # chloride Cl- GABA
-        self.leak = Channel(-70)  # potasium K+
-        # calcium Ca++
+	def step(self, dtvm):
+		return self.membrane_potential - dtvm * self.getNetCurrent()
 
-        self.net_current = 0
+class Channel:
+	def __init__(self, equilibrium, maximum_conductance):
+		self.equilibrium = equilibrium  # E_c the voltage when the current is 0
+		self.maximum_conductance = maximum_conductance  # g_bar_c the maximum conductance of the channel fixme
+		self.fraction_open = 0  # g_c the fraction of the channels current from 0 to 1 at time t fixme
 
-        self.voltage_membrane = 0  # begin at the net equilibruim potential fixme
-        self.time = 0
+	def getConductance(self):
+		return self.fraction_open * self.maximum_conductance
 
-    def step(self, dt_vm):
-        self.excitatory.update(self.voltage_membrane, self.time)
-        self.inhibitory.update(self.voltage_membrane, self.time)
-        self.leak.update(self.voltage_membrane, self.time)
-
-        self.net_current = self.excitatory.current + self.inhibitory.current + self.leak.current
-
-        self.voltage_membrane += dt_vm * self.net_current  # the neurons membrain potential at time t
-        self.time += 1
-
-
-if __name__ == "__name__":
-    neuron = Neuron()
-    graph = []
-    dt_vm = 0.1
-
-    for t in range(100):
-        neuron.step(dt_vm)
-        graph += [neuron.voltage_membrane]
-
+	def getCurrent(self, membrane_potential):
+		return self.getConductance() * (membrane_potential - self.equilibrium)  # g_c * g_bar_c * (v_m - E_c)
