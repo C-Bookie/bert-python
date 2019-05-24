@@ -24,10 +24,14 @@ class Neuron:
 		# self.calcium = Channel(0)  # calcium Ca++ todo
 		self.threshold = +55
 
+		self.gain = 10
+
 		self.act = 0
-		self.default_membrane_potential = self.getEquilibriumMembranePotential()
-		self.membrane_potential = self.default_membrane_potential
+		self.default_membrane_potential = -80
+		self.membrane_potential = self.getEquilibriumMembranePotential()
 		self.I_net = self.getNetCurrent()
+
+		self.graph = []
 
 	def getEquilibriumMembranePotential(self):
 		i = self.inhibitory.getConductance() * self.inhibitory.equilibrium
@@ -43,60 +47,49 @@ class Neuron:
 		return self.inhibitory.getCurrent(self.membrane_potential) + self.excitatory.getCurrent(self.membrane_potential) + self.leak.getCurrent(self.membrane_potential)
 
 	def step(self, dtvm):
-		self.act = 0
-		if self.membrane_potential >= self.threshold:
-			self.act = 1
+		x = max([0, self.gain * (self.membrane_potential - self.threshold)])
+		self.act = x / (x + 1)
+		if self.act > 0:
 			self.membrane_potential = self.default_membrane_potential
+
 		self.I_net = self.getNetCurrent()
 		self.membrane_potential = self.membrane_potential + dtvm * self.I_net
 
-def plotGraph(graph):
-	keys = []
+		self.graph += [deepcopy(self)]
 
-	fig, ax1 = plt.subplots()
-	ax1.plot(range(cycles), [slice.membrane_potential for slice in graph], color='c')
+	def plotGraph(self):
+		cycles = len(self.graph)
+		keys = []
 
-	# gain = 0.5
-	# rate_coading = []
-	# total = 0
-	# for slice in graph:
-	# 	total += slice.act
-	# 	rate_coading += [gain * total]
-	# ax1.plot(range(cycles), rate_coading, linestyle=":", color='b')
+		fig, ax1 = plt.subplots()
+		ax1.plot(range(cycles), [slice.membrane_potential for slice in self.graph], color='c')
+		ax1.set_xlabel("cycle")
+		ax1.set_ylabel("voltage", color='c')
+		keys += ["voltage"]
 
-	ax1.set_xlabel("cycle")
-	ax1.set_ylabel("voltage", color='c')
-	keys += ["voltage"]
+		ax2 = ax1.twinx()
+		ax2.plot(range(cycles), [slice.inhibitory.conductance for slice in self.graph], linestyle="--", color='r')
+		ax2.plot(range(cycles), [slice.excitatory.conductance for slice in self.graph], linestyle="--", color='g')
+		ax2.plot(range(cycles), [slice.leak.conductance for slice in self.graph], linestyle="--", color='b')
+		ax2.set_ylabel("conductance")
+		keys += ["excitatory", "inhibitory", "leak"]
 
-	ax2 = ax1.twinx()
-	ax2.plot(range(cycles), [slice.inhibitory.conductance for slice in graph], linestyle="--", color='r')
-	ax2.plot(range(cycles), [slice.excitatory.conductance for slice in graph], linestyle="--", color='g')
-	ax2.plot(range(cycles), [slice.leak.conductance for slice in graph], linestyle="--", color='b')
-	ax2.set_ylabel("conductance")
-	keys += ["excitatory", "inhibitory", "leak"]
+		ax3 = ax1.twinx()
+		ax3.plot(range(cycles), [slice.I_net for slice in self.graph], color='m')
+		ax3.set_ylabel("net current")
+		keys += ["net current"]
 
-	ax3 = ax1.twinx()
-	ax3.plot(range(cycles), [slice.I_net for slice in graph], color='m')
-	ax3.set_ylabel("net current")
-	keys += ["net current"]
+		ax4 = ax1.twinx()
+		ax4.plot(range(cycles), [slice.act for slice in self.graph], color='y')
+		ax4.set_ylabel("act")
+		keys += ["act"]
 
-	# ax4 = ax1.twinx()
-	# ax4.plot(range(cycles), [slice.act for slice in graph], color='y')
-	# ax4.set_ylabel("act")
-	# keys += ["act"]
+		fig.legend(keys)
+		fig.tight_layout()
+		plt.show()
 
-	fig.legend(keys)
-	fig.tight_layout()
-	plt.show()
-
-
-if __name__ == "__main__":
-	neuron = Neuron()
-	graph = []
-	dtvm = 0.05
-	cycles = 400
-
-	for i in range(cycles):
+def test1(neuron, dtvm):
+	for i in range(400):
 		if i == 50:
 			neuron.excitatory.fraction_open = 1
 		if i == 100:
@@ -106,9 +99,30 @@ if __name__ == "__main__":
 		if i == 200:
 			neuron.inhibitory.fraction_open = 0
 		neuron.step(dtvm)
-		graph += [deepcopy(neuron)]
 
-	plotGraph(graph)
+def test2(neuron, dtvm):
+	neuron.threshold = 40
+	for i in range(400):
+		if i == 50:
+			neuron.excitatory.fraction_open = 1
+		neuron.step(dtvm)
+
+def test3(neuron, dtvm):
+	for i in range(400):
+		if i == 50:
+			neuron.excitatory.fraction_open = 1
+		neuron.step(dtvm)
+
+def run():
+	neuron = Neuron()
+	dtvm = 0.05
+	# test1(neuron, dtvm)
+	# test2(neuron, dtvm)
+	test3(neuron, dtvm)
+	neuron.plotGraph()
+
+if __name__ == "__main__":
+	run()
 
 
 
