@@ -22,7 +22,7 @@ class Neuron:
 		self.leak = Neuron.Channel(-70)  # potassium K+
 		self.leak.fraction_open = 0.1
 		# self.calcium = Channel(0)  # calcium Ca++ todo
-		self.threshold = +55
+		self.threshold = -55
 
 		self.gain = 10
 
@@ -82,7 +82,7 @@ def plotGraph(graph):
 
 	fig.legend(keys)
 	fig.tight_layout()
-	plt.show()
+	fig.show()
 
 def test1(neuron, dtvm):
 	graph = []
