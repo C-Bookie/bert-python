@@ -7,8 +7,11 @@ import random
 import math
 import time
 
-# import screen
-import pi_io
+import numpy as np
+import tensorflow as tf
+
+import screen
+# import pi_io
 # import hue_io
 
 
@@ -44,14 +47,38 @@ def makeNeurons(_path):
             tempN[len(tempN)] = [int(a[0]), int(a[1])]
     return N
 
-def numpy_neurons(N):
-    pass
+
+def neurons_to_list(N: dict) -> list:
+    top_y = max(N.keys())
+    top_x = 0
+    for y in N:
+        for x in N[y]:
+            sub_top = N[y][x][0]
+            if sub_top > top_x:
+                top_x = sub_top
+
+    top = max([top_x, top_y])
+
+    new_N = []
+    for y in range(top):
+        new_N += [[0]*top]
+
+    for y in range(top_y):
+        if y in N:
+            for x in range(top_x):
+                for i in N[y]:
+                    connected = N[y][i]
+                    if connected[0] == x:
+                        new_N[y][x] = connected[1]
+                        break
+
+    return new_N
 
 def sigmoid(x):
   return 1 / (1 + math.exp(-x))
 
 class Bert:
-    display = pi_io
+    display = screen
 
     def __init__(self):
         self.N = makeNeurons("./maps/bert.map")  # list of neurons, each contains a list of synapses composed of the target and strength
@@ -138,8 +165,43 @@ class Bert:
                 time.sleep(self.wait)
 
 if __name__ == '__main__':
-    bert = Bert()
-    bert.run()
+    # bert = Bert()
+    # bert.run()
+    Nlist = np.array(neurons_to_list(makeNeurons("./maps/bert.map")))
+
+    tf.enable_eager_execution()
+
+    size = len(Nlist)
+
+    threshold = 30
+
+    def activation(x):
+        return tf.keras.activations.relu(x, max_value=threshold, threshold=threshold)
+
+    def discharge(charges):
+        for i, charge in enumerate(charges[0]):
+            if charge >= threshold:
+                charges[0][i] = 0
+        return charges
+
+    model = tf.keras.models.Sequential([
+        tf.keras.layers.InputLayer((size,)),
+        tf.keras.layers.Dense(size, name="main", use_bias=False)
+    ])
+
+    model.compile(optimizer='adam',
+                  loss='sparse_categorical_crossentropy',
+                  metrics=['accuracy'])
+
+    model.set_weights([Nlist])
+    weights = model.get_weights()
+
+    charges = np.array([[1]*size])
+
+    while True:
+        charges = model.predict(charges)
+        charges = discharge(charges)
+        print(charges)
 
 
 
